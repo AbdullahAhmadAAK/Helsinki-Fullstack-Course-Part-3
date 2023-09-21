@@ -1,7 +1,11 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
+
+const Person = require('./models/Person')
+
 
 app.use(express.json())
 app.use(express.static('dist'))
@@ -19,42 +23,68 @@ app.use(morgan(function (tokens, req, res) {
         ].join(' ')
   }))
 
-let phonenumbers_list = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+// let phonenumbers_list = [
+//     { 
+//       "id": 1,
+//       "name": "Arto Hellas", 
+//       "number": "040-123456"
+//     },
+//     { 
+//       "id": 2,
+//       "name": "Ada Lovelace", 
+//       "number": "39-44-5323523"
+//     },
+//     { 
+//       "id": 3,
+//       "name": "Dan Abramov", 
+//       "number": "12-43-234345"
+//     },
+//     { 
+//       "id": 4,
+//       "name": "Mary Poppendieck", 
+//       "number": "39-23-6423122"
+//     }
+// ]
 
 app.get('/api/persons', (request, response) => {
-    response.json(phonenumbers_list)
+    Person.find({})
+    .then(notes => {
+        if(notes) {
+            response.json(notes)
+        }
+        else {
+            response.status(400).json({
+                error: "notes not found"
+            })
+        }
+    })
+    .catch(error => {
+        response.json({
+            error: error
+        })
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = phonenumbers_list.find(list_number => list_number.id === id)
-    if(person) {
-        response.json(person)
-    }
-    else {
-        response.status(404).end()
-    }
+    const id = request.params.id
+    Person.findById(id)
+    .then(notes => {
+        console.log(notes)
+        if(notes) {
+            response.json(notes)
+        }
+        else {
+            response.status(400).json({
+                error: "that note not found"
+            })
+        }
+    })
+    .catch(error => {
+        response.json({
+            error: error
+        })
+    })
+
 })
 
 app.get('/info', (request, response) => {
@@ -79,20 +109,32 @@ app.post('/api/persons', (request, response) => {
         error_missing_inputs = true
     }
     
-    let namefound = phonenumbers_list.find(list_number => personInput.name === list_number.name)
-    if(namefound) {
-        error_nonunique_name = true
-    }
+    // let namefound = phonenumbers_list.find(list_number => personInput.name === list_number.name)
+    // if(namefound) {
+    //     error_nonunique_name = true
+    // }
 
     if(!error_missing_inputs && !error_nonunique_name) {
-        const randomly_generated_id = Math.floor(Math.random() * 10000 + 1)
-        let person = {
-            id: randomly_generated_id,
-            name: personInput.name,
-            number: personInput.number
-        }
-        phonenumbers_list = phonenumbers_list.concat(person)
-        response.json(person)
+        // const randomly_generated_id = Math.floor(Math.random() * 10000 + 1)
+        // let person = {
+        //     id: randomly_generated_id,
+        //     name: personInput.name,
+        //     number: personInput.number
+        // }
+        // phonenumbers_list = phonenumbers_list.concat(person)
+        // response.json(person)
+
+        
+
+            const person = new Person({
+                name: personInput.name,
+                number: personInput.number,
+            })
+
+            person.save().then(savedPerson => {
+                response.json(savedPerson)
+            })
+
     }
 
     else {
