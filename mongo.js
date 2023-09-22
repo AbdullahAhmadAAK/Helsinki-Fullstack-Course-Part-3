@@ -5,9 +5,6 @@ if (process.argv.length<3) {
   process.exit(1)
 }
 
-// const url =
-//   `mongodb+srv://aak606:${password}@cluster0.rwhalao.mongodb.net/?retryWrites=true&w=majority`
-
 // mongoose.set('strictQuery',false)
 // mongoose.connect(url)
 
